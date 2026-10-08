@@ -4,12 +4,17 @@ class Array:
         with open('data/pesanan.csv',newline='') as pesanan:
             reader = csv.DictReader(pesanan)
             self.reader = list(reader)
-            print(int(self.reader[0]['prioritas']))
+            # print(int(self.reader[0]['prioritas']))
     def append(self):
-        pass
+        M = []
+        for row in self.reader:
+            if row['prioritas'] == '1':
+                M.append(row['pelanggan'])
+                print(M)
     def insert(self):
         pass
     def get(self):
         pass
 
 test = Array()
+test.append()
