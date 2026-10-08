@@ -5,3 +5,6 @@ class Array:
         pass
     def Linkedlist(self):
         pass
+
+if __name__=="__main__":
+    pass
