@@ -5,8 +5,8 @@ class Array:
             reader = csv.DictReader(list_data)
             self.reader = list(reader)
 
-        self.data = []
-        print(len(self.data))
+        self.antrian = []
+        print(len(self.antrian))
         self.history = []
 
     def melihat_pesanan(self):
@@ -34,24 +34,38 @@ class Array:
                 
 
         if data['prioritas'] == 1:
-            self.data.insert(0,data)
+            self.antrian.insert(0,data)
 
         elif data['prioritas'] == 2:
-            for index, row in enumerate(self.data):
+            for index, row in enumerate(self.antrian):
                 if int(row['prioritas']) == 3:
-                    self.data.insert(index, data)
+                    self.antrian.insert(index, data)
                     break
 
             else:
-                self.data.append(data)
+                self.antrian.append(data)
 
         elif data['prioritas'] == 3:
-            self.data.append(data)
+            self.antrian.append(data)
 
         self.history.append(data['pelanggan'])
         print(self.history)
-        aku_mau_print = [prioritas['prioritas'] for prioritas in self.data]
+        # aku_mau_print = [prioritas['prioritas'] for prioritas in self.antrian]
+        # print(aku_mau_print)
+        aku_mau_print = [id['oid'] for id in self.antrian]
+        print(aku_mau_print)        
+
+    def menghapus_pesanan(self):
+        # data berupa dict
+        data = self.melihat_pesanan()
+
+        for index, row in enumerate(self.antrian):
+            if data['pelanggan'] == row['pelanggan']:
+                self.antrian.pop(index)
+
+        aku_mau_print = [id['oid'] for id in self.antrian]
         print(aku_mau_print)
+
             
 arr = Array()
 
@@ -67,6 +81,9 @@ while(True):
 
     if aku_mau == 2:
         arr.menambah_pesanan()
+
+    if aku_mau == 3:
+        arr.menghapus_pesanan()
 
     if aku_mau == len(m1):
         break
