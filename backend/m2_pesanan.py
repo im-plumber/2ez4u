@@ -2,7 +2,7 @@ import csv
 import os
 import time
 
-# Indeks Kolom Data Pesanan (Pengganti dict agar patuh aturan proyek)
+# index kolom 
 IDX_OID = 0
 IDX_PELANGGAN = 1
 IDX_RESTO = 2
@@ -31,9 +31,7 @@ def cari_path_csv(default_path="data/pesanan.csv"):
         return "pesanan.csv"
     return default_path
 
-
-# stack
-class Tumpukan:
+class Stack:
     def __init__(self, kapasitas_awal=16):
         self.kapasitas = kapasitas_awal
         self.data = [None] * self.kapasitas
@@ -80,11 +78,7 @@ class Tumpukan:
         return hasil
 
 
-# ==========================================
-# 2. MESIN KASIR: INFIX KE POSTFIX & EVALUASI
-# ==========================================
 def pecah_token(ekspresi):
-    """Memecah string ekspresi matematika menjadi token angka dan operator."""
     tokens = []
     i = 0
     n = len(ekspresi)
@@ -116,9 +110,9 @@ def tingkat_operator(op):
 
 
 def ke_postfix(ekspresi):
-    """Mengubah ekspresi infix menjadi list token postfix memakai Tumpukan."""
+
     tokens = pecah_token(ekspresi)
-    stack = Tumpukan()
+    stack = Stack()
     keluaran = []
     langkah_konversi = []
     no = 1
@@ -166,13 +160,13 @@ def ke_postfix(ekspresi):
 
 
 def hitung(postfix):
-    """Mengevaluasi token postfix memakai Tumpukan angka."""
+
     if isinstance(postfix, str):
         tokens = postfix.split()
     else:
         tokens = postfix
 
-    stack = Tumpukan()
+    stack = Stack()
     langkah_evaluasi = []
     no = 1
 
@@ -183,7 +177,6 @@ def hitung(postfix):
             tindakan = f"operand, push {nilai}"
             hasil_str = str(nilai)
         else:
-            # Penting: Pop pertama adalah operand KANAN (b), kedua adalah KIRI (a)
             b = stack.pop()
             a = stack.pop()
             if token == '+':
@@ -209,11 +202,7 @@ def hitung(postfix):
     return total, langkah_evaluasi
 
 
-# ==========================================
-# 3. STRUKTUR DATA QUEUE NAIF VS MELINGKAR
-# ==========================================
 class AntreanNaif:
-    """Queue di atas larik biasa: dequeue mengambil indeks 0 dan menggeser seluruh sisa elemen."""
     def __init__(self):
         self.data = []
         self.total_geseran = 0
@@ -226,7 +215,7 @@ class AntreanNaif:
             return None, 0
         item = self.data[0]
         geseran = len(self.data) - 1
-        # Geser manual satu per satu ke kiri (O(n))
+
         for i in range(geseran):
             self.data[i] = self.data[i + 1]
         self.data.pop()
@@ -234,13 +223,11 @@ class AntreanNaif:
         return item, geseran
 
     def pop_belakang(self):
-        """Digunakan saat membatalkan (undo) enqueue."""
         if self.is_empty():
             return None
         return self.data.pop()
 
     def kembalikan_ke_depan(self, daftar_pesanan):
-        """Digunakan saat membatalkan (undo) dequeue: dikembalikan ke DEPAN antrean."""
         data_baru = []
         for x in daftar_pesanan:
             data_baru.append(x)
@@ -256,7 +243,6 @@ class AntreanNaif:
 
 
 class AntreanMelingkar:
-    """Circular Queue: dequeue hanya memajukan penunjuk front dengan operasi modulo O(1)."""
     def __init__(self, kapasitas=32768):
         self.kapasitas = kapasitas
         self.data = [None] * self.kapasitas
@@ -291,7 +277,6 @@ class AntreanMelingkar:
         return x
 
     def pop_belakang(self):
-        """Digunakan saat membatalkan (undo) enqueue."""
         if self.is_empty():
             return None
         self.rear = (self.rear - 1 + self.kapasitas) % self.kapasitas
@@ -301,7 +286,6 @@ class AntreanMelingkar:
         return x
 
     def kembalikan_ke_depan(self, daftar_pesanan):
-        """Mengembalikan daftar pesanan ke DEPAN antrean melingkar secara terbalik agar urutan tetap utuh."""
         while self.count + len(daftar_pesanan) > self.kapasitas:
             self._perbesar()
         for i in range(len(daftar_pesanan) - 1, -1, -1):
@@ -315,22 +299,17 @@ class AntreanMelingkar:
     def ukuran(self):
         return self.count
 
-
-# ==========================================
-# 4. ENGINE BACKEND M2 & CLI INTERAKTIF
-# ==========================================
 class BackendM2:
     def __init__(self, path_csv="data/pesanan.csv"):
         self.path_csv = cari_path_csv(path_csv)
         self.naif = AntreanNaif()
         self.circular = AntreanMelingkar(32768)
-        self.undo_stack = Tumpukan()
-        self.redo_stack = Tumpukan()
+        self.undo_stack = Stack()
+        self.redo_stack = Stack()
         self.id_terakhir = 200000
         self.muat_data_antre()
 
     def muat_data_antre(self):
-        """Memuat seluruh pesanan berstatus ANTRE ke dalam kedua antrean sekaligus."""
         with open(self.path_csv, newline='', encoding='utf-8') as f:
             reader = csv.reader(f)
             next(reader)  # Lewati header
@@ -431,7 +410,7 @@ class BackendM2:
     def undo_last(self):
         t0 = time.perf_counter()
         if self.undo_stack.kosong():
-            return None, "Tumpukan undo kosong, tidak ada aksi yang bisa dibatalkan.", 0.0
+            return None, "Stack undo kosong, tidak ada aksi yang bisa dibatalkan.", 0.0
 
         aksi, payload = self.undo_stack.pop()
         if aksi == "ENQUEUE":
@@ -456,7 +435,7 @@ class BackendM2:
     def redo_last(self):
         t0 = time.perf_counter()
         if self.redo_stack.kosong():
-            return None, "Tumpukan redo kosong, tidak ada yang diulang.", 0.0
+            return None, "Stack redo kosong, tidak ada yang diulang.", 0.0
 
         aksi, payload = self.redo_stack.pop()
         if aksi == "ENQUEUE":
@@ -562,13 +541,13 @@ def start():
             _, pesan, ms = m2.undo_last()
             print(f"\n{pesan}")
             print(f"Panjang antrean sekarang: naif {m2.naif.ukuran():,}, circular {m2.circular.ukuran():,}. "
-                  f"Tumpukan undo {m2.undo_stack.ukuran}, redo {m2.redo_stack.ukuran} | Waktu: {ms:.2f} ms")
+                  f"Stack undo {m2.undo_stack.ukuran}, redo {m2.redo_stack.ukuran} | Waktu: {ms:.2f} ms")
 
         elif opsi == 6:
             _, pesan, ms = m2.redo_last()
             print(f"\n{pesan}")
             print(f"Panjang antrean sekarang: naif {m2.naif.ukuran():,}, circular {m2.circular.ukuran():,}. "
-                  f"Tumpukan undo {m2.undo_stack.ukuran}, redo {m2.redo_stack.ukuran} | Waktu: {ms:.2f} ms")
+                  f"Stack undo {m2.undo_stack.ukuran}, redo {m2.redo_stack.ukuran} | Waktu: {ms:.2f} ms")
 
         elif opsi == 7:
             print("\n--- STATISTIK M2 ---")
