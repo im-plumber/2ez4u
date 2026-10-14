@@ -28,14 +28,17 @@ class Array:
 
         # data berupa dict
         data = self.melihat_pesanan()
+        if data is None:
+            return
 
+        data = data.copy()
         data['prioritas'] = int(data['prioritas'])
 
         for row in self.history:
             if row == data['pelanggan']:
                 raise InterruptedError("data sudah tersedia!")
                 
-
+        time_start = time.perf_counter()
         if data['prioritas'] == 1:
             self.antrian.insert(0,data)
 
@@ -50,6 +53,7 @@ class Array:
 
         elif data['prioritas'] == 3:
             self.antrian.append(data)
+        time_end = time.perf_counter()
 
         self.history.append(data['pelanggan'])
         print(self.history)
@@ -57,19 +61,25 @@ class Array:
         # print(aku_mau_print)
         aku_mau_print = [id['oid'] for id in self.antrian]
         print(aku_mau_print)    
+        print(f"Waktu tambah Array: {time_end - time_start:.8f} detik")
 
 
     def menghapus_pesanan(self):
         # data berupa dict
         data = self.melihat_pesanan()
+        if data is None:
+            return
 
         time_start = time.perf_counter()
         for index, row in enumerate(self.antrian):
             if data['pelanggan'] == row['pelanggan']:
                 self.antrian.pop(index)
+                break
+        time_end = time.perf_counter()
 
         aku_mau_print = [id['oid'] for id in self.antrian]
         print(aku_mau_print)
+        print(f"Waktu hapus Array: {time_end - time_start:.8f} detik")
 
 class Node:
     def __init__(self, data):
@@ -111,6 +121,7 @@ class LinkedList:
             if row == data['pelanggan']:
                 raise InterruptedError("data sudah tersedia!")
 
+        time_start = time.perf_counter()
         new_node = Node(data)
 
         # kondisi prioritas
@@ -141,17 +152,20 @@ class LinkedList:
         elif data['prioritas'] == 3:
             self.tail.next = new_node
             self.tail = new_node
+        time_end = time.perf_counter()
 
         # Catat ke history dan cetak hasil antrian
         self.history.append(data['pelanggan'])
         print(self.history)
         self.cetak_antrian()
+        print(f"Waktu tambah LinkedList: {time_end - time_start:.8f} detik")
 
     def menghapus_pesanan(self):
         data = self.melihat_pesanan()
         if data is None or self.head is None:
             return
 
+        time_start = time.perf_counter()
         current = self.head
         prev = None
 
@@ -170,8 +184,10 @@ class LinkedList:
             
             prev = current
             current = current.next
+        time_end = time.perf_counter()
 
         self.cetak_antrian()
+        print(f"Waktu hapus LinkedList: {time_end - time_start:.8f} detik")
 
     def cetak_antrian(self):
         aku_mau_print = []
@@ -207,4 +223,4 @@ def start():
             break
 
 if __name__ == "__main__":
-    start() 
+    start()
