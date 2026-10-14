@@ -206,4 +206,5 @@ def start():
         if aku_mau == len(m1):
             break
 
-start() 
+if __name__ == "__main__":
+    start() 
