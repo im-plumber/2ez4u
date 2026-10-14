@@ -66,24 +66,54 @@ class Array:
         aku_mau_print = [id['oid'] for id in self.antrian]
         print(aku_mau_print)
 
+def start_arr():
+    arr = Array()
+    while(True):
+        print("mau ngelakuin apa sekarang? ")
+        m1 = ("melihat pesanan", "menambah pesanan", "menghapus pesanan","exit")
+        for i in range(len(m1)):
+            print(f"{i+1}.", m1[i])
+
+        aku_mau = int(input(f"Masukkan angka 1 - {len(m1)} : "))
+        if aku_mau == 1:
+            print(arr.melihat_pesanan())
+
+        if aku_mau == 2:
+            arr.menambah_pesanan()
+
+        if aku_mau == 3:
+            arr.menghapus_pesanan()
+
+        if aku_mau == len(m1):
+            break
+
+class LinkedList:
+    def __init__(self,data):
+            with open('data/pesanan.csv',newline='') as list_data:
+                reader = csv.DictReader(list_data)
+                self.reader = list(reader)
+    
+            self.data = data
+            self.next = None   
+ 
             
-arr = Array()
+def start_linked():
+    link = LinkedList()
+    while(True):
+        print("mau ngelakuin apa sekarang? ")
+        m1 = ("melihat pesanan", "menambah pesanan", "menghapus pesanan","exit")
+        for i in range(len(m1)):
+            print(f"{i+1}.", m1[i])
 
-while(True):
-    print("mau ngelakuin apa sekarang? ")
-    m1 = ("melihat pesanan", "menambah pesanan", "menghapus pesanan","exit")
-    for i in range(len(m1)):
-        print(f"{i+1}.", m1[i])
+        aku_mau = int(input(f"Masukkan angka 1 - {len(m1)} : "))
+        if aku_mau == 1:
+            print(link.melihat_pesanan())
 
-    aku_mau = int(input(f"Masukkan angka 1 - {len(m1)} : "))
-    if aku_mau == 1:
-        print(arr.melihat_pesanan())
+        if aku_mau == 2:
+            link.menambah_pesanan()
 
-    if aku_mau == 2:
-        arr.menambah_pesanan()
+        if aku_mau == 3:
+            link.menghapus_pesanan()
 
-    if aku_mau == 3:
-        arr.menghapus_pesanan()
-
-    if aku_mau == len(m1):
-        break
+        if aku_mau == len(m1):
+            break
