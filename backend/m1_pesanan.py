@@ -206,4 +206,4 @@ def start():
         if aku_mau == len(m1):
             break
 
-start()
+start() 
