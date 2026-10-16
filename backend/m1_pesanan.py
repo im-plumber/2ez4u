@@ -1,29 +1,35 @@
 import csv
 import time
+import sys
+
+def csv_data():
+    with open('data/pesanan.csv', newline='') as list_data:
+        reader = csv.DictReader(list_data)
+        reader = list(reader)
+        return reader        # data berupa dict
+
+def cetak(antrian):
+    antrian = [(pelanggan['pelanggan'], pelanggan['oid']) for pelanggan in antrian]
+    return print(antrian)
 
 class Array:
     def __init__(self):
-        with open('data/pesanan.csv',newline='') as list_data:
-            reader = csv.DictReader(list_data)
-            self.reader = list(reader)
+        self.reader = csv_data()
 
         self.antrian = []
-        print(len(self.antrian))
+
         self.history = []       
 
     def melihat_pesanan(self):
-        cek_id = input("Masukkan id (harus 6 digit) : ")
-        cek_id = 'O-' + cek_id
+        cek_id = int(input("Masukkan id (harus 6 digit) : "))
 
-        for row in self.reader:
-            if cek_id == row["oid"]:
-                return row
-                break
+        jarak = id(self.reader[1]) - id(self.reader[0])
+        
+        print(self.reader[cek_id - 1])
 
-        else:
-            print("mungkin ada spasi atau salah ketik, coba koreksi kembali.")
+        return self.reader[cek_id - 1]
 
-
+        
     def menambah_pesanan(self):
 
         # data berupa dict
@@ -31,14 +37,17 @@ class Array:
         if data is None:
             return
 
-        data = data.copy()
         data['prioritas'] = int(data['prioritas'])
 
         for row in self.history:
             if row == data['pelanggan']:
                 raise InterruptedError("data sudah tersedia!")
+
+            else:
+                # cek nama-nama yang sudah pernah ditambahkan
+                self.history.append(data['pelanggan'])
+                print(self.history)
                 
-        time_start = time.perf_counter()
         if data['prioritas'] == 1:
             self.antrian.insert(0,data)
 
@@ -53,153 +62,46 @@ class Array:
 
         elif data['prioritas'] == 3:
             self.antrian.append(data)
-        time_end = time.perf_counter()
 
-        self.history.append(data['pelanggan'])
-        print(self.history)
-        # aku_mau_print = [prioritas['prioritas'] for prioritas in self.antrian]
-        # print(aku_mau_print)
-        aku_mau_print = [id['oid'] for id in self.antrian]
-        print(aku_mau_print)    
-        print(f"Waktu tambah Array: {time_end - time_start:.8f} detik")
+
+        # sekadar check prioritasnya sudah benar atau belum
+        cetak(self.antrian)
 
 
     def menghapus_pesanan(self):
-        # data berupa dict
+
         data = self.melihat_pesanan()
         if data is None:
             return
 
-        time_start = time.perf_counter()
         for index, row in enumerate(self.antrian):
             if data['pelanggan'] == row['pelanggan']:
                 self.antrian.pop(index)
+                
+                for row in self.history:
+                    if row == data['pelanggan']:
+                        self.history.pop(row)
+                        break
                 break
-        time_end = time.perf_counter()
 
-        aku_mau_print = [id['oid'] for id in self.antrian]
-        print(aku_mau_print)
-        print(f"Waktu hapus Array: {time_end - time_start:.8f} detik")
+        cetak(self.antrian)
+
 
 class Node:
-    def __init__(self, data):
+    def __init__(self,data):
         self.data = data
         self.next = None
 
 class LinkedList:
     def __init__(self):
-        with open('data/pesanan.csv', newline='') as list_data:
-            reader = csv.DictReader(list_data)
-            self.reader = list(reader)
-            
-        self.head = None
-        self.tail = None
-        self.history = []
+        self.reader = csv_data()
 
-    def melihat_pesanan(self):
-        cek_id = input("Masukkan id (harus 6 digit) : ")
-        cek_id = 'O-' + cek_id
-
-        for row in self.reader:
-            if cek_id == row["oid"]:
-                return row
-        else:
-            print("mungkin ada spasi atau salah ketik, coba koreksi kembali.")
-            return None
-
-    def menambah_pesanan(self):
-        data = self.melihat_pesanan()
-        if data is None:
-            return
-
-        # jaga-jaga agar data di self.reader tidak berubah
-        data = data.copy()
-        data['prioritas'] = int(data['prioritas'])
-
-        # Cek apakah pelanggan sudah ada di history
-        for row in self.history:
-            if row == data['pelanggan']:
-                raise InterruptedError("data sudah tersedia!")
-
-        time_start = time.perf_counter()
-        new_node = Node(data)
-
-        # kondisi prioritas
-        if self.head is None:
-            self.head = new_node
-            self.tail = new_node
-
-        elif data['prioritas'] == 1:
-            new_node.next = self.head
-            self.head = new_node
-
-        elif data['prioritas'] == 2:
-            if int(self.head.data['prioritas']) == 3:
-                new_node.next = self.head
-                self.head = new_node
-            else:
-                current = self.head
-                while current.next is not None and int(current.next.data['prioritas']) != 3:
-                    current = current.next
-                
-                new_node.next = current.next
-                current.next = new_node
-                
-                if new_node.next is None:
-                    self.tail = new_node
-
-        # Kondisi 4: Prioritas 3 (Selalu masuk di paling belakang / menjadi tail baru)
-        elif data['prioritas'] == 3:
-            self.tail.next = new_node
-            self.tail = new_node
-        time_end = time.perf_counter()
-
-        # Catat ke history dan cetak hasil antrian
-        self.history.append(data['pelanggan'])
-        print(self.history)
-        self.cetak_antrian()
-        print(f"Waktu tambah LinkedList: {time_end - time_start:.8f} detik")
-
-    def menghapus_pesanan(self):
-        data = self.melihat_pesanan()
-        if data is None or self.head is None:
-            return
-
-        time_start = time.perf_counter()
-        current = self.head
-        prev = None
-
-        while current is not None:
-            if current.data['pelanggan'] == data['pelanggan']:
-                if prev is None:
-                    self.head = current.next
-                    if self.head is None:
-                        self.tail = None
-                
-                else:
-                    prev.next = current.next
-                    if current.next is None:
-                        self.tail = prev
-                break
-            
-            prev = current
-            current = current.next
-        time_end = time.perf_counter()
-
-        self.cetak_antrian()
-        print(f"Waktu hapus LinkedList: {time_end - time_start:.8f} detik")
-
-    def cetak_antrian(self):
-        aku_mau_print = []
-        current = self.head
-        while current is not None:
-            aku_mau_print.append(current.data['oid'])
-            current = current.next
-        print(aku_mau_print)
+        
 
 def start():
     arr = Array()
-    link = LinkedList()
+    # link = LinkedList()
+
     while(True):
         print("mau ngelakuin apa sekarang? ")
         m1 = ("melihat pesanan", "menambah pesanan", "menghapus pesanan","exit")
@@ -208,16 +110,16 @@ def start():
 
         aku_mau = int(input(f"Masukkan angka 1 - {len(m1)} : "))
         if aku_mau == 1:
-            print(arr.melihat_pesanan())
-            print(link.melihat_pesanan())
+            arr.melihat_pesanan()
+            # print(link.melihat_pesanan())
 
         if aku_mau == 2:
             arr.menambah_pesanan()
-            link.menambah_pesanan()
+            # link.menambah_pesanan()
 
         if aku_mau == 3:
             arr.menghapus_pesanan()
-            link.menghapus_pesanan()
+            # link.menghapus_pesanan()
 
         if aku_mau == len(m1):
             break
