@@ -1,6 +1,4 @@
 import csv
-import time
-import sys
 
 def csv_data():
     with open('data/pesanan.csv', newline='') as list_data:
@@ -18,12 +16,10 @@ class Array:
 
         self.antrian = []
 
-        self.history = []       
+        self.history = []
 
     def melihat_pesanan(self):
         cek_id = int(input("Masukkan id (harus 6 digit) : "))
-
-        jarak = id(self.reader[1]) - id(self.reader[0])
         
         print(self.reader[cek_id - 1])
 
@@ -95,12 +91,75 @@ class Node:
 class LinkedList:
     def __init__(self):
         self.reader = csv_data()
+        self.head = None
 
-        
+    def cetak_antrian(self):
+        hasil = []
+        pointer = self.head
+        while pointer:
+            hasil.append((pointer.data['pelanggan'], pointer.data['oid']))
+            pointer = pointer.next
+        print(f"Antrian saat ini: {hasil}")
+
+    def melihat_pesanan(self):
+        cek_id = input("Masukkan id (harus 6 digit) : ")
+        cek_id = 'O-' + cek_id
+
+        for row in self.reader:
+            if cek_id == row['oid']:
+                return row
+                break
+
+    def menambah_pesanan(self):
+        data = self.melihat_pesanan()
+
+        new_node = Node(data)
+
+        prioritas = int(data['prioritas'])
+
+        if self.head is None or prioritas < int(self.head.data['prioritas']):
+            new_node.next = self.head
+            self.head = new_node
+
+        else:
+            pointer = self.head
+            while pointer.next and int(pointer.next.data['prioritas']) <= prioritas:
+                pointer = pointer.next
+            
+            new_node.next = pointer.next
+            pointer.next = new_node
+
+        self.cetak_antrian()
+
+    def menghapus_pesanan(self):
+        data = self.melihat_pesanan()
+        if data is None or self.head is None:
+            print("Antrian kosong atau data tidak ditemukan.")
+            return
+
+        target_pelanggan = data['pelanggan']
+
+        # Kasus jika node target berada di head
+        if self.head.data['pelanggan'] == target_pelanggan:
+            self.head = self.head.next
+            self.cetak_antrian()
+            return
+
+        # Telusuri untuk mencari simpul target
+        pointer = self.head
+        while pointer.next and pointer.next.data['pelanggan'] != target_pelanggan:
+            pointer = pointer.next
+
+        if pointer.next is not None:
+            pointer.next = pointer.next.next
+        else:
+            print("Data pesanan tidak ditemukan di dalam antrian.")
+
+        self.cetak_antrian()
 
 def start():
     arr = Array()
-    # link = LinkedList()
+    link = LinkedList()
 
     while(True):
         print("mau ngelakuin apa sekarang? ")
@@ -111,15 +170,15 @@ def start():
         aku_mau = int(input(f"Masukkan angka 1 - {len(m1)} : "))
         if aku_mau == 1:
             arr.melihat_pesanan()
-            # print(link.melihat_pesanan())
+            print(link.melihat_pesanan())
 
         if aku_mau == 2:
             arr.menambah_pesanan()
-            # link.menambah_pesanan()
+            link.menambah_pesanan()
 
         if aku_mau == 3:
             arr.menghapus_pesanan()
-            # link.menghapus_pesanan()
+            link.menghapus_pesanan()
 
         if aku_mau == len(m1):
             break
